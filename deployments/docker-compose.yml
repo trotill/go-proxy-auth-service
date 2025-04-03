@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  auth_proxy:
+    container_name: auth_proxy
+    image: monkeyhouse1/auth_proxy:${TAG:-latest}
+    privileged: true
+    pid: host
+    ports:
+      - "9080:9080"
+    env_file: ${ENV_FILE}
+    build:
+      dockerfile: Dockerfile
+      args:
+        BRANCH: develop

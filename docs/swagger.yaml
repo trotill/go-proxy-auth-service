@@ -1,0 +1,169 @@
+basePath: /
+definitions:
+  types.JobError:
+    properties:
+      code:
+        description: The error code of the job
+        type: string
+      description:
+        description: The error description of the job
+        type: string
+    type: object
+  types.JobListItem:
+    properties:
+      created_at:
+        description: Job create time
+        type: integer
+      id:
+        description: Job ID
+        type: string
+      payload:
+        allOf:
+        - $ref: '#/definitions/types.JobRequest'
+        description: Job request
+      result:
+        allOf:
+        - $ref: '#/definitions/types.JobResponse'
+        description: Job result
+    type: object
+  types.JobRequest:
+    properties:
+      action:
+        description: |-
+          The name of the application/script or the path to the application/script. If ALLOW_ABSOLUTE_MODE=0, the path is replaced by SCRIPT_PATH
+          example: ls
+        maxLength: 2048
+        minLength: 1
+        type: string
+      arguments:
+        description: |-
+          Array of application/script string arguments
+          example: ["-la"]
+        items:
+          type: string
+        type: array
+      id:
+        description: |-
+          Job ID. If more than one application is running at the same time, the job ID is used to separate their responses
+          example: myLs
+        maxLength: 100
+        minLength: 2
+        type: string
+      timeout:
+        default: 1000
+        description: |-
+          Maximum execution time (in seconds)
+          example: 60
+        type: integer
+      type:
+        description: |-
+          Execution method, by absolute path or from SCRIPT_PATH folder
+          example: "absolute"
+        enum:
+        - related
+        - absolute
+        type: string
+    required:
+    - action
+    - arguments
+    - id
+    - timeout
+    - type
+    type: object
+  types.JobResponse:
+    properties:
+      error:
+        allOf:
+        - $ref: '#/definitions/types.JobError'
+        description: The error of the job execution
+      result:
+        allOf:
+        - $ref: '#/definitions/types.JobResult'
+        description: The result of the job execution
+      status:
+        description: |-
+          The status of the job
+          example: finish
+        enum:
+        - run
+        - error
+        - finish
+        type: string
+    type: object
+  types.JobResult:
+    properties:
+      exit_code:
+        description: Job exit code
+        type: integer
+      stderr:
+        description: Job stderr
+        type: string
+      stdout:
+        description: Job stdout
+        type: string
+    type: object
+  utils.HttpError:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      validation: {}
+    type: object
+host: localhost:9080
+info:
+  contact:
+    email: monkeyhouse@mail.ru
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is API with Swagger documentation.
+  termsOfService: http://swagger.io/terms/
+  title: black hole API
+  version: "1.0"
+paths:
+  /job:
+    post:
+      consumes:
+      - application/json
+      description: Returns job id
+      parameters:
+      - description: Job request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/types.JobRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/utils.HttpError'
+      summary: Run job
+      tags:
+      - job
+  /job/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns job info
+      parameters:
+      - description: Job id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.JobListItem'
+      summary: Get job
+      tags:
+      - job
+swagger: "2.0"

@@ -1,0 +1,234 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is API with Swagger documentation.",
+        "title": "black hole API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "monkeyhouse@mail.ru"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:9080",
+    "basePath": "/",
+    "paths": {
+        "/job": {
+            "post": {
+                "description": "Returns job id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Run job",
+                "parameters": [
+                    {
+                        "description": "Job request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/types.JobRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/utils.HttpError"
+                        }
+                    }
+                }
+            }
+        },
+        "/job/{id}": {
+            "get": {
+                "description": "Returns job info",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "Get job",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Job id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.JobListItem"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "types.JobError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "The error code of the job",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "The error description of the job",
+                    "type": "string"
+                }
+            }
+        },
+        "types.JobListItem": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "Job create time",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "Job ID",
+                    "type": "string"
+                },
+                "payload": {
+                    "description": "Job request",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/types.JobRequest"
+                        }
+                    ]
+                },
+                "result": {
+                    "description": "Job result",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/types.JobResponse"
+                        }
+                    ]
+                }
+            }
+        },
+        "types.JobRequest": {
+            "type": "object",
+            "required": [
+                "action",
+                "arguments",
+                "id",
+                "timeout",
+                "type"
+            ],
+            "properties": {
+                "action": {
+                    "description": "The name of the application/script or the path to the application/script. If ALLOW_ABSOLUTE_MODE=0, the path is replaced by SCRIPT_PATH\nexample: ls",
+                    "type": "string",
+                    "maxLength": 2048,
+                    "minLength": 1
+                },
+                "arguments": {
+                    "description": "Array of application/script string arguments\nexample: [\"-la\"]",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "description": "Job ID. If more than one application is running at the same time, the job ID is used to separate their responses\nexample: myLs",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2
+                },
+                "timeout": {
+                    "description": "Maximum execution time (in seconds)\nexample: 60",
+                    "type": "integer",
+                    "default": 1000
+                },
+                "type": {
+                    "description": "Execution method, by absolute path or from SCRIPT_PATH folder\nexample: \"absolute\"",
+                    "type": "string",
+                    "enum": [
+                        "related",
+                        "absolute"
+                    ]
+                }
+            }
+        },
+        "types.JobResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "description": "The error of the job execution",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/types.JobError"
+                        }
+                    ]
+                },
+                "result": {
+                    "description": "The result of the job execution",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/types.JobResult"
+                        }
+                    ]
+                },
+                "status": {
+                    "description": "The status of the job\nexample: finish",
+                    "type": "string",
+                    "enum": [
+                        "run",
+                        "error",
+                        "finish"
+                    ]
+                }
+            }
+        },
+        "types.JobResult": {
+            "type": "object",
+            "properties": {
+                "exit_code": {
+                    "description": "Job exit code",
+                    "type": "integer"
+                },
+                "stderr": {
+                    "description": "Job stderr",
+                    "type": "string"
+                },
+                "stdout": {
+                    "description": "Job stdout",
+                    "type": "string"
+                }
+            }
+        },
+        "utils.HttpError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "validation": {}
+            }
+        }
+    }
+}
