@@ -8,10 +8,15 @@ import (
 )
 
 type Config struct {
-	Port            string `env:"PORT" envDefault:"9080"`
-	TargetUrl       string `env:"TARGET_URL" envDefault:"http://127.0.0.1:3000"`
-	AccessTokenName string `env:"ACCESS_TOKEN_NAME" envDefault:"access"`
-	DisableLogs     int    `env:"DISABLE_LOGS" envDefault:"0"`
+	Port              string `env:"PORT" envDefault:"9080"`
+	TargetUrl         string `env:"TARGET_URL" envDefault:"http://127.0.0.1:3000"`
+	AccessTokenName   string `env:"ACCESS_TOKEN_NAME" envDefault:"access"`
+	DisableLogs       int    `env:"DISABLE_LOGS" envDefault:"0"`
+	DbPath            string `env:"DB_PATH" envDefault:"./db/auth.db"`
+	PublicKeyPath     string `env:"PUBLIC_KEY_PATH" envDefault:"./db/public.key"`
+	RoleAdminBlock    int    `env:"ROLE_ADMIN_BLOCK" envDefault:"0"`
+	RoleOperatorBlock int    `env:"ROLE_OPERATOR_BLOCK" envDefault:"1"`
+	RoleGuestBlock    int    `env:"ROLE_GUEST_BLOCK" envDefault:"1"`
 }
 
 var cfg = Config{}

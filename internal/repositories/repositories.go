@@ -9,12 +9,16 @@ type Repository struct {
 	DB *gorm.DB
 }
 
-func NewUserRepository(db *gorm.DB) *Repository {
+func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{DB: db}
 }
 
-func (r *Repository) FindByLogin(login string) (*models.User, error) {
+func (r *Repository) FindUser(login string, sessionId string) (*models.User, error) {
 	var user models.User
-	err := r.DB.Where("login = ?", login).First(&user).Error
+	//err := r.DB.Where("login = ?", login).
+	//		Preload("Sessions", "sessionId = ?", sessionId).First(&user).Error
+	err := r.DB.Model(&models.Session{}).Select("*").
+		Joins("JOIN users ON users.login = sessions.login").
+		Where("users.login = ? AND sessions.sessionId = ?", login, sessionId).First(&user).Error
 	return &user, err
 }

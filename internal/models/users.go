@@ -1,19 +1,18 @@
 package models
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 type User struct {
-	gorm.Model
-	login     string    `gorm:"unique;not null"`
-	role      string    `gorm:"not null"`
-	password  string    `gorm:"not null"`
-	firstName string    `gorm:"not null"`
-	lastName  string    `gorm:"not null"`
-	email     string    `gorm:"not null"`
-	locked    uint32    `gorm:"not null"`
-	createdAt time.Time `gorm:"not null"`
-	updatedAt time.Time `gorm:"not null"`
+	Login     string    `gorm:"unique;not null"`
+	Role      string    `gorm:"not null"`
+	Password  string    `gorm:"not null"`
+	FirstName string    `gorm:"not null"`
+	LastName  string    `gorm:"not null"`
+	Email     string    `gorm:"not null"`
+	Locked    uint32    `gorm:"not null"`
+	CreatedAt time.Time `gorm:"not null"`
+	UpdatedAt time.Time `gorm:"not null"`
+	//Sessions  []Session `gorm:"foreignKey:Login;references:Login"`
 }

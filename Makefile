@@ -58,8 +58,3 @@ down.dev:
 tidy:
 	$(GO) mod tidy
 
-## generate swagger
-.PHONY: swagger
-swagger:
-	swag init -g cmd/authProxy/authProxy.go
-
