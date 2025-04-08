@@ -4,15 +4,13 @@ ARG BRANCH
 
 RUN apk update
 RUN apk add --no-cache curl git make
-RUN git clone https://github.com/trotill/docker-black-hole.git /opt/dbh --branch $BRANCH&&\
-    cd /opt/dbh&&\
-    go install github.com/swaggo/swag/cmd/swag@v1.16.4&&\
+RUN git clone https://github.com/trotill/go-proxy-auth-service.git /opt/auth --branch $BRANCH&&\
+    cd /opt/auth&&\
     make tidy&&\
-    make swagger&&\
     make build
 
 FROM alpine:3.21
-COPY --from=build /opt/dbh/bin/blackHole /app
+COPY --from=build /opt/auth/bin/authProxy /app
 
 ENTRYPOINT ["/app"]
-CMD /app/blackHole
+CMD /app/authProxy

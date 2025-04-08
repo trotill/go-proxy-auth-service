@@ -21,7 +21,7 @@ help:
 ## build: build the application
 build:
     # Include additional build steps, like TypeScript, SCSS or Tailwind compilation here...
-	$(GO) build -o=bin/${binary_name} ${main_package_path}
+	CGO_ENABLED=1 $(GO) build -o=bin/${binary_name} ${main_package_path}
 
 ## run: run the  application
 .PHONY: run

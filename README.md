@@ -1,18 +1,16 @@
-# Docker Black Hole (DBH)
-The service provides a secure way for services in the docker-compose environment to communicate with the external environment. The service has its own REST API and swagger file, with the help of which neighbouring services can execute scripts and applications outside the docker-compose environment.  
+# Proxy auth service validator
+The service allows authenticating requests with JWT tokens supported by the authentication service (https://github.com/trotill/auth-service)
 
 Common application examples:
-- rebooting or shutting down a VDS
-- obtaining complete information about the host system,
-- manipulating the graphical environment with utilities,
-- configuring the network on the host system and firewall,
-- manipulating docker with the docker command
+- adding native JWT authentication to a non-secured (open) service, e.g. grafana with authentication disabled
+- reducing requests to the authentication service
+- parallel, multi-threaded authentication of requests,
 
 Docker image of the service takes about 20MB and is in request idle mode, it does not consume memory and CPU time.
 
 # How to use
 ```
-docker pull monkeyhouse1/black_hole:<version>, e.g. docker pull monkeyhouse1/black_hole:0.1.0
+docker pull monkeyhouse1/auth_proxy:<version>, e.g. docker pull monkeyhouse1/auth_proxy:0.1.0
 ```
 
 Copy .env.example to .env, specify your settings, put the file in docker compose or docker.  
@@ -20,16 +18,14 @@ If the .env file is missing, the application will take the variables from the en
 
 Example of running under docker
 ```
-docker run -p 9080:9080 --pid host --privileged --env-file ./.env --name "blh-service" monkeyhouse1/black_hole:0.1.0
+docker run -p 9080:9080 --pid host --privileged --env-file ./.env --name "auth_proxy" monkeyhouse1/auth_proxy:0.1.0
 ```
 
 Example of use in docker-compose
 ```
-   blh-service:
-     container_name: blh-service
-     image: monkeyhouse1/black_hole:0.1.0
-     privileged: true
-     pid: host
+   auth_proxy:
+     container_name: auth_proxy
+     image: monkeyhouse1/auth_proxy:0.1.0
      env_file:
        - .env
      expose:
@@ -38,31 +34,25 @@ Example of use in docker-compose
 ```
 OR
 ```
-   blh-service:
-     container_name: blh-service
-     image: monkeyhouse1/black_hole:0.1.0
+  auth_proxy:
+     container_name: auth_proxy
+     image: monkeyhouse1/auth_proxy:0.1.0
      privileged: true
      pid: host
      environment:
-       PORT=9080
-       DOCKER=0
-       EXECUTE_MAX_TIMEOUT_SEC=600
-       SCRIPT_PATH=/home/ivan/work/golang/docker-black-hole/scripts/
-       ALLOW_ABSOLUTE_MODE=1
-       EXECUTE_FROM_USER=ivan
-       SHELL_PATH=/usr/bin/sh
+        PORT: 9180
+        TARGET_URL: http://127.0.0.1:3000
+        ACCESS_TOKEN_NAME: access
+        DB_PATH: /app/db/auth.db
+        PUBLIC_KEY_PATH: /app/db/public.key
+        ROLE_GUEST_BLOCK: 1
+        ROLE_OPERATOR_BLOCK: 1
+        ROLE_ADMIN_BLOCK: 0
+
      expose:
        - "9080"
      restart: unless-stopped
 ```
-# Safety
-Safety is ensured by the following:
-- only one service is running in privileged mode, which is minimalistic and has only a few endpoints,
-- with the SCRIPT_PATH and ALLOW_ABSOLUTE_MODE=false options you can restrict the directory with scripts,
-- using the EXECUTE_FROM_USER option you can specify the user on behalf of which commands will be executed in the external environment
-
-# SWAGGER
-There is a swagger for easy integration, use it to evaluate the service and generate code
 
 # .env file options
 PORT. Port number (9080 default)  
@@ -70,49 +60,37 @@ PORT. Port number (9080 default)
 PORT=9080
 ```
 
-DOCKER. 1 - the service is run in a docker-compose environment, 0 - the service is run as a separate application in the host system  (1 default)
+TARGET_URL. URL of the application to which requests will be proxied
 ```
-DOCKER=1
-```
-
-EXECUTE_FROM_USER. User in the host system on behalf of which applications/scripts will be run  (root default)
-```
-EXECUTE_FROM_USER=develinux
+TARGET_URL=http://grafana:3000
 ```
 
-EXECUTE_MAX_TIMEOUT_SEC. Max. time (in sec.) of application/script execution. The setting protects against hangs of the running application/script. (600 default)
+ACCESS_TOKEN_NAME. Access token name
 ```
-EXECUTE_MAX_TIMEOUT_SEC=600
-```
-
-SCRIPT_PATH. Path to scripts. If ALLOW_ABSOLUTE_MODE option is disabled, the service can execute scripts only from the SCRIPT_PATH folder (scripts default)   
-```
-SCRIPT_PATH=/opt/scrips/
+ACCESS_TOKEN_NAME=access
 ```
 
-ALLOW_ABSOLUTE_MODE. Allows execution of programmes/scripts from any folder of the host system. If this option is disabled, execution is allowed only from the SCRIPT_PATH folder (0 default)
+DB_PATH. Database path
 ```
-ALLOW_ABSOLUTE_MODE=1
-```
-
-DISABLE_LOGS. Will disable all logs (0 default).    
-```
-DISABLE_LOGS=0
+DB_PATH=/app/db/auth.db
 ```
 
-SHELL_PATH. Shell path, bash for default (bash default)   
+PUBLIC_KEY_PATH. Path to the public key
 ```
-SHELL_PATH=/usr/bin/sh
+PUBLIC_KEY_PATH=/opt/scrips/
 ```
 
-# REST
+ROLE_GUEST_BLOCK. Block requests to a user with the role - guest
+```
+ROLE_GUEST_BLOCK=1
+```
 
-The app provides 2 endpoints for interaction.  
-POST -> Job to run the task (RunJob)  
-GET -> Job/{ID} to get the state of the task (GetJob).
+ROLE_OPERATOR_BLOCK.  Block requests to the user with the role - operator 
+```
+ROLE_OPERATOR_BLOCK=1
+```
 
-The endpoints fields are described in detail in the swagger file.
-
-Interaction logic.  
-A RunJob execution request is sent, then GetJob is executed at intervals until the state is set to finish or error  
-As soon as the finish status is received, the result is analysed
+ROLE_ADMIN_BLOCK.  Block requests to a user with the admin role
+```
+ROLE_ADMIN_BLOCK=1
+```

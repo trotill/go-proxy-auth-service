@@ -8,7 +8,7 @@ import (
 )
 
 type Config struct {
-	Port              string `env:"PORT" envDefault:"9080"`
+	Port              string `env:"PORT" envDefault:"9180"`
 	TargetUrl         string `env:"TARGET_URL" envDefault:"http://127.0.0.1:3000"`
 	AccessTokenName   string `env:"ACCESS_TOKEN_NAME" envDefault:"access"`
 	DisableLogs       int    `env:"DISABLE_LOGS" envDefault:"0"`
@@ -28,7 +28,7 @@ func load() {
 	flag.Parse()
 	err := godotenv.Load(*envFilePath)
 	if err != nil {
-		log.Println("Config file not found. System environment variables are used. For set config file use option env, example [docker-black-hole --env=.env.prod]")
+		log.Println("Config file not found. System environment variables are used. For set config file use option env, example [authProxy --env=.env.prod]")
 
 	} else {
 		log.Printf("Loading env variables from %s", *envFilePath)
