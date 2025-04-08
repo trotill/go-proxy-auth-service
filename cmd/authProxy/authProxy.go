@@ -29,7 +29,7 @@ func main() {
 	}
 	repos := repositories.NewRepository(db)
 	ginCtx := gin.Default()
-	target, _ := url.Parse("http://127.0.0.1:3000")
+	target, _ := url.Parse(config.TargetUrl)
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	proxy.Director = func(req *http.Request) {

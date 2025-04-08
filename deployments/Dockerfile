@@ -3,7 +3,7 @@ FROM golang:1.23.0-alpine as build
 ARG BRANCH
 
 RUN apk update
-RUN apk add --no-cache curl git make
+RUN apk add --no-cache curl git make build-base
 RUN git clone https://github.com/trotill/go-proxy-auth-service.git /opt/auth --branch $BRANCH&&\
     cd /opt/auth&&\
     make tidy&&\

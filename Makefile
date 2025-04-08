@@ -42,6 +42,11 @@ dev:
 up.dev:
 	TAG=$(IMAGE_TAG) ENV_FILE=../.env docker compose -f deployments/docker-compose.yml up -d
 
+## build.dev: run docker compose
+.PHONY: build.dev
+build.dev:
+	TAG=$(IMAGE_TAG) ENV_FILE=../.env docker compose -f deployments/docker-compose.yml build --no-cache
+
 ## push.dev: push docker image
 .PHONY: push.dev
 push.dev:
