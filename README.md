@@ -1,12 +1,12 @@
-# Proxy auth service validator
+#  End-to-end proxy authentication service to unauthenticated resources
 The service allows authenticating requests with JWT tokens supported by the authentication service (https://github.com/trotill/auth-service)
 
-Common application examples:
+Use cases:
 - adding native JWT authentication to a non-secured (open) service, e.g. grafana with authentication disabled
 - reducing requests to the authentication service
 - parallel, multi-threaded authentication of requests,
 
-Docker image of the service takes about 20MB and is in request idle mode, it does not consume memory and CPU time.
+Docker image of the service takes about 25MB and is in request idle mode, it does not consume memory and CPU time.
 
 # How to use
 ```
